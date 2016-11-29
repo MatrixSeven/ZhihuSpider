@@ -2,7 +2,7 @@
 
 ## 博客更新地址:[http://sweets.cf](http://sweets.cf/2016/11/23/%E7%9F%A5%E4%B9%8E%E7%88%AC%E8%99%AB%E4%B9%8B%E5%BC%80%E7%AF%87/) 
 ## 知乎专栏更新地址[https://zhuanlan.zhihu.com/Accelerator](https://zhuanlan.zhihu.com/Accelerator) 
-### 1. Git求Star~O(∩_∩)O哈哈~
+### 1. Git求Star~O(∩_∩)O哈哈~~
 ### 2. 知乎求关注~~[知乎账号@Accelerator](https://www.zhihu.com/people/Sweets07)
 ### 3. 本git只包含爬虫部分,web服务器和可视化部分另外单开.
 在知乎看到一个可视化话题的文章，所以一时心血来潮，打算用Java也写一个爬虫并且集成到Spring中，结合ECharts生成人物关系，当然，既然爬一次，个人信息也都要获取到。
