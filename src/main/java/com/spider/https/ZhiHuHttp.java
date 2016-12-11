@@ -21,7 +21,7 @@ package com.spider.https;
  * Created by seven on 2016/11/29.
  */
 
-import com.spider.Tool.Config;
+import com.spider.tool.Config;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;

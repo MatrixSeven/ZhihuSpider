@@ -15,9 +15,9 @@ package com.spider.parser;
 //		   (______|______)
 //=======================================================
 
-import com.spider.Tool.Config;
-import com.spider.Tool.Console;
-import com.spider.Tool.LruCache;
+import com.spider.tool.Config;
+import com.spider.tool.Console;
+import com.spider.tool.LruCache;
 import com.spider.dao.SaveDaoInterface;
 import com.spider.dao.imp;
 import com.spider.entity.FollowNexus;

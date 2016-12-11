@@ -1,5 +1,5 @@
 
-package com.spider.Tool;
+package com.spider.tool;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

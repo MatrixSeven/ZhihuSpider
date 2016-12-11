@@ -15,7 +15,7 @@ package com.spider.dao;
 //		   (______|______)
 //=======================================================
 
-import com.spider.Tool.Config;
+import com.spider.tool.Config;
 import com.spider.dao.datasource.unpooled.UnpooledDataSource;
 import com.spider.entity.FollowNexus;
 import com.spider.entity.UserBase;

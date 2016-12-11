@@ -1,4 +1,4 @@
-package com.spider.Tool;
+package com.spider.tool;
 
 public class Console {
 

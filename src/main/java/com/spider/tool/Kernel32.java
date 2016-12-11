@@ -1,4 +1,4 @@
-package com.spider.Tool;
+package com.spider.tool;
 
 import com.sun.jna.Native;
 import com.sun.jna.win32.StdCallLibrary;
