@@ -1,3 +1,4 @@
+package com.spider;
 //=======================================================
 //		          .----.
 //		       _.'__    `.
@@ -8,14 +9,22 @@
 //		        `;_:    `"'
 //		      .'"""""`.
 //		     /,  ya ,\\
-//		    //π∑…Ò±£””\\
+//		    //ÁãóÁ•û‰øù‰Ωë\\
 //		    `-._______.-'
 //		    ___`. | .'___
 //		   (______|______)
 //=======================================================
+
+import com.spider.parser.MainMangerControl;
+
 /**
  * [Zhihu]https://www.zhihu.com/people/Sweets07
  * [Github]https://github.com/MatrixSeven
- * Created by seven on 2016/11/29.
+ * Created by seven on 2016/12/1.
  */
-package com.spider.entity;
+public class MainStar {
+    public static void main(String[] args) throws Exception{
+       new MainMangerControl().star();
+
+    }
+}

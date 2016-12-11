@@ -1,0 +1,38 @@
+@startuml
+start
+:initConfig;
+partition initDb
+    if(first?) then(yes)
+        :CreateTable;
+     else(no)
+        :Pass;
+    endif
+}
+partition initCookie
+    if(isExistCookie?) then (yes)
+        :Deserialize
+        Cookie;
+        :LoadCookie;
+    else(no)
+        :Login;
+        :SerializeCookie;
+        :SaveCookie;
+    endif;
+}
+partition initSpider
+    :Load(initUrl);
+    if(dbExist(url)) then(yes)
+        if(urlIsInit) then(yes)
+            :selectAllMin;
+            :return url;
+        else (no)
+            :return url;
+         endif;
+    else(no)
+        : Save(url);
+        : Load(url);
+        : return url;
+    endif;
+   }
+:end;
+@enduml

@@ -1,3 +1,4 @@
+package com.spider.entity;
 //=======================================================
 //		          .----.
 //		       _.'__    `.
@@ -8,14 +9,26 @@
 //		        `;_:    `"'
 //		      .'"""""`.
 //		     /,  ya ,\\
-//		    //π∑…Ò±£””\\
+//		    //ÁãóÁ•û‰øù‰Ωë\\
 //		    `-._______.-'
 //		    ___`. | .'___
 //		   (______|______)
 //=======================================================
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
 /**
  * [Zhihu]https://www.zhihu.com/people/Sweets07
  * [Github]https://github.com/MatrixSeven
- * Created by seven on 2016/11/29.
+ * Created by seven on 2016/11/30.
  */
-package com.spider.parser;
+@Data
+@AllArgsConstructor
+public class FollowNexus {
+    //Nothing
+    private String token_id;
+    //Nothing
+    private String token_flower;
+
+}
