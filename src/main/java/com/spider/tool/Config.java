@@ -36,6 +36,7 @@ public class Config {
     private String cookie_path;
     private String zhihu_name;
     private String zhihu_pass;
+    private String isOnlyParser;
     private static Config INSTANCES;
 
     static {
@@ -56,6 +57,7 @@ public class Config {
             this.cookie_path = p.getProperty("cookie_path");
             this.zhihu_name = p.getProperty("zhihu_name");
             this.zhihu_pass = p.getProperty("zhihu_pass");
+            this.isOnlyParser=p.getProperty("isOnlyParser");
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -42,4 +42,8 @@ public class UserBase{
         return this.token.equals(((UserBase)o).getToken());
     }
 
+    @Override
+    public int hashCode() {
+        return token.hashCode();
+    }
 }

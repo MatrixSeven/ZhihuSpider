@@ -9,7 +9,7 @@ package com.spider.parser;
 //		        `;_:    `"'
 //		      .'"""""`.
 //		     /,  ya ,\\
-//		    //ç‹—ç¥ä¿ä½‘\\
+//		    //¹·Éñ±£ÓÓ\\
 //		    `-._______.-'
 //		    ___`. | .'___
 //		   (______|______)
@@ -45,10 +45,10 @@ public class MainMangerControl {
     private SaveDaoInterface daoInterface;
     private int max = 20;
     private int max_active = Integer.valueOf(Config.INSTANCES().getThread_max_active());
-//parserfollwer
+    //parserfollwer
     protected static ThreadPoolExecutor servicePool = (ThreadPoolExecutor) Executors.
             newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-//parserinfo
+    //parserinfo
     protected static ThreadPoolExecutor servicePoolInfo = (ThreadPoolExecutor) Executors.
             newFixedThreadPool(Runtime.getRuntime().availableProcessors()/2);
 
@@ -63,13 +63,15 @@ public class MainMangerControl {
     }
 
     public void star() {
-        try {
-            for (UserBase u : daoInterface.Init(new UserBase(Config.INSTANCES().getStar_token())))
-                this.servicePool.execute(new ParserFollower(u, this));
-            printStatus();
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(Config.INSTANCES().getIsOnlyParser().equals("false")) {
+            try {
+                for (UserBase u : daoInterface.Init(new UserBase(Config.INSTANCES().getStar_token())))
+                    this.servicePool.execute(new ParserFollower(u, this));
+                printStatus();
+            } catch (Exception e) {
+                e.printStackTrace();
 
+            }
         }
     }
 
@@ -96,7 +98,7 @@ public class MainMangerControl {
                     for (UserBase u : this.daoInterface.getNewForUserBase()) {
                         this.servicePool.execute(new ParserFollower(u, this));
                     }
-                    System.out.println("å¢åŠ ä»»åŠ¡GetFollower");
+                    System.out.println("Ôö¼ÓÈÎÎñGetFollower");
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -117,7 +119,7 @@ public class MainMangerControl {
                     for (UserBase u :token) {
                         this.servicePoolInfo.execute(new ParserUserInfo(u, this));
                     }
-                    System.out.println("å¢åŠ ä»»åŠ¡ParserInfo");
+                    System.out.println("Ôö¼ÓÈÎÎñParserInfo");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -198,24 +200,24 @@ public class MainMangerControl {
                     addTask();
                     Console.clear();
                     System.out.println(
-                            "æœ€å°çº¿ç¨‹æ•°ï¼š" + servicePool.getCorePoolSize() + "\n" +
-                                    "æœ€å¤§çº¿ç¨‹æ•°ï¼š" + servicePool.getMaximumPoolSize() + "\n" +
-                                    "ä»»åŠ¡é˜Ÿåˆ—å¤§å°ï¼š" + servicePool.getQueue().size() + "\n" +
-                                    "æ€»ä»»åŠ¡æ•°ï¼š" + servicePool.getTaskCount() + "\n" +
-                                    "æ´»è·ƒçº¿ç¨‹æ•°ï¼š" + servicePool.getActiveCount() + "\n" +
-                                    "å®Œæˆçº¿ç¨‹æ•°ï¼š" + servicePool.getCompletedTaskCount() + "\n" +
-                                    "ç¼“å­˜å¤§å°:" + tempUserBases.size() + "\n" +
+                            "×îĞ¡Ïß³ÌÊı£º" + servicePool.getCorePoolSize() + "\n" +
+                                    "×î´óÏß³ÌÊı£º" + servicePool.getMaximumPoolSize() + "\n" +
+                                    "ÈÎÎñ¶ÓÁĞ´óĞ¡£º" + servicePool.getQueue().size() + "\n" +
+                                    "×ÜÈÎÎñÊı£º" + servicePool.getTaskCount() + "\n" +
+                                    "»îÔ¾Ïß³ÌÊı£º" + servicePool.getActiveCount() + "\n" +
+                                    "Íê³ÉÏß³ÌÊı£º" + servicePool.getCompletedTaskCount() + "\n" +
+                                    "»º´æ´óĞ¡:" + tempUserBases.size() + "\n" +
                                     this.tempUserBases.toString()+"\n"+
                                     "========================================================\n"+
-                                    "æœ€å°çº¿ç¨‹æ•°ï¼š" + servicePoolInfo.getCorePoolSize() + "\n" +
-                                    "æœ€å¤§çº¿ç¨‹æ•°ï¼š" + servicePoolInfo.getMaximumPoolSize() + "\n" +
-                                    "ä»»åŠ¡é˜Ÿåˆ—å¤§å°ï¼š" + servicePoolInfo.getQueue().size() + "\n" +
-                                    "æ€»ä»»åŠ¡æ•°ï¼š" + servicePoolInfo.getTaskCount() + "\n" +
-                                    "æ´»è·ƒçº¿ç¨‹æ•°ï¼š" + servicePoolInfo.getActiveCount() + "\n" +
-                                    "å®Œæˆçº¿ç¨‹æ•°ï¼š" + servicePoolInfo.getCompletedTaskCount() + "\n"
+                                    "×îĞ¡Ïß³ÌÊı£º" + servicePoolInfo.getCorePoolSize() + "\n" +
+                                    "×î´óÏß³ÌÊı£º" + servicePoolInfo.getMaximumPoolSize() + "\n" +
+                                    "ÈÎÎñ¶ÓÁĞ´óĞ¡£º" + servicePoolInfo.getQueue().size() + "\n" +
+                                    "×ÜÈÎÎñÊı£º" + servicePoolInfo.getTaskCount() + "\n" +
+                                    "»îÔ¾Ïß³ÌÊı£º" + servicePoolInfo.getActiveCount() + "\n" +
+                                    "Íê³ÉÏß³ÌÊı£º" + servicePoolInfo.getCompletedTaskCount() + "\n"
                     );
 
-                    System.out.println("è¿è¡Œ" + (System.currentTimeMillis() - time) / 1000.00 + "S");
+                    System.out.println("ÔËĞĞ" + (System.currentTimeMillis() - time) / 1000.00 + "S");
 
                     Thread.sleep(3000);
                 }
