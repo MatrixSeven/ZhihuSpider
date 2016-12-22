@@ -9,7 +9,7 @@ package com.spider.parser;
 //		        `;_:    `"'
 //		      .'"""""`.
 //		     /,  ya ,\\
-//		    //狗神保佑\\
+//		    //������\\
 //		    `-._______.-'
 //		    ___`. | .'___
 //		   (______|______)
@@ -61,9 +61,9 @@ public class ParserUserInfo extends ParserBase{
         u.setFollowers(ParserHelper.Select(doc, ".item[href$=followers] strong"));
         u.setAgree(ParserHelper.Select(doc, ".zm-profile-header-user-agree strong"));
         u.setThanked(ParserHelper.Select(doc, ".zm-profile-header-user-thanks strong"));
-        u.setColumns(ParserHelper.Select(doc, "a[href$=followed] strong").replace(" 个专栏",""));
-        u.setTopic(ParserHelper.Select(doc, "a[href$=topics] strong").replace(" 个话题",""));
-        u.setSex(ParserHelper.Select(doc, ".item.gender i", e -> e.attr("class").equals("")?"女":"男"));
+        u.setColumns(ParserHelper.Select(doc, "a[href$=followed] strong").replace(" \u4e2a\u4e13\u680f",""));
+        u.setTopic(ParserHelper.Select(doc, "a[href$=topics] strong").replace(" \u4e2a\u8bdd\u9898",""));
+        u.setSex(ParserHelper.Select(doc, ".item.gender i", e -> e.attr("class").equals("")?"\u5973":"\u7537"));
         u.setWeibo(ParserHelper.Select(doc, ".zm-profile-header-user-weibo",e->e.attr("href")));
         return  u;
 

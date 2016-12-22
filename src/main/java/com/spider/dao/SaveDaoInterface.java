@@ -18,6 +18,7 @@ package com.spider.dao;
 import com.spider.entity.FollowNexus;
 import com.spider.entity.UserBase;
 import com.spider.entity.UserInfo;
+import com.spider.tool.LruCacheImp;
 
 import java.util.List;
 
@@ -43,6 +44,12 @@ public interface SaveDaoInterface {
      * @throws Exception
      */
     void SaveForFollow(List<FollowNexus> followNexuses) throws Exception;
+
+    /**
+     *
+     * @throws Exception
+     */
+    LruCacheImp iniTemp(int size) throws Exception;
     /**
      * 储存userBases
      * @param userBases

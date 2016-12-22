@@ -15,11 +15,12 @@ package com.spider.dao;
 //		   (______|______)
 //=======================================================
 
-import com.spider.tool.Config;
 import com.spider.dao.datasource.unpooled.UnpooledDataSource;
 import com.spider.entity.FollowNexus;
 import com.spider.entity.UserBase;
 import com.spider.entity.UserInfo;
+import com.spider.tool.Config;
+import com.spider.tool.LruCacheImp;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -38,7 +39,7 @@ public class imp implements SaveDaoInterface {
             UnpooledDataSource("com.mysql.jdbc.Driver",
             (CONFIG.getDb_url().concat(CONFIG.getDb_name())),
             CONFIG.getDb_user_name(), CONFIG.getDb_user_pass());
-
+    private static final Object look=new Object();
     private final String SQL_INIT =
             "select * from users where isinit=0 and token='%s'";
     private final String SQL_INSERT_USERINFO =
@@ -53,39 +54,62 @@ public class imp implements SaveDaoInterface {
     private final String SQL_INSERT_FOLLOWER =
             "insert INTO follower (user_token,user_token_follower) VALUES (?,?)";
     private final String SQL_SELECT_USERBASE =
-            "select id,token,from_id from_id,from_token from users where isinit='0' and from_id=(select max(from_id) from users where from_id<>'0') limit 500";
+            "SELECT id,token,from_id from_id,from_token FROM users WHERE isinit = '0' group by from_id LIMIT 10000";
+            //"select id,token,from_id from_id,from_token from users where isinit='0' and from_id=(select max(from_id) from users where from_id<>'0') limit 500";
     private final String SQL_ISEXIST_USERBASE =
             "select * from users where token=?";
     private final String SQL_UPDATE_USERBASE_PARSER =
             "UPDATE users set isparser=? WHERE  token=?";
     private final String SQL_GET_USERBASE_PARSER =
-            "select * from users where isparser='0' limit 500";
+            "select * from users where isparser='0' limit 10000";
 
     private final String IS_INIT_DB =
             "SELECT w.TABLE_NAME FROM information_schema.TABLES w WHERE w.table_name =? and w.TABLE_SCHEMA=?";
 
     @Override
     public void UpdateParserInfo(List<UserBase> info) throws Exception {
-        Connection connection = UNPOOLED_DATA_SOURCE.getConnection();
-        connection.setAutoCommit(false);
-        PreparedStatement ps = connection.prepareStatement(SQL_UPDATE_USERBASE_PARSER);
-        for (UserBase token : info) {
-            ps.setString(1, "1");
-            ps.setString(2, token.getToken());
-            ps.addBatch();
+        synchronized (look) {
+            Connection connection = UNPOOLED_DATA_SOURCE.getConnection();
+            connection.setAutoCommit(false);
+            PreparedStatement ps = connection.prepareStatement(SQL_UPDATE_USERBASE_PARSER);
+            for (UserBase token : info) {
+                ps.setString(1, "1");
+                ps.setString(2, token.getToken());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            connection.commit();
+            close(ps, connection);
         }
-        ps.executeBatch();
-        connection.commit();
-        close(ps, connection);
     }
 
     @Override
     public List<UserBase> getParserInfoUserBase() throws Exception {
-        Connection connection = UNPOOLED_DATA_SOURCE.getConnection();
-        PreparedStatement ps = connection.prepareStatement(SQL_GET_USERBASE_PARSER);
-        List<UserBase> userBase = getUserBase(ps.executeQuery());
-        close(ps, connection);
-        return userBase;
+        synchronized (look) {
+            Connection connection = UNPOOLED_DATA_SOURCE.getConnection();
+            PreparedStatement ps = connection.prepareStatement(SQL_GET_USERBASE_PARSER);
+            List<UserBase> userBase = getUserBase(ps.executeQuery());
+            close(ps, connection);
+            return userBase;
+        }
+    }
+
+
+    @Override
+    public void UpdateBase(List<UserBase> userBases) throws Exception {
+        synchronized (look) {
+            Connection connection = UNPOOLED_DATA_SOURCE.getConnection();
+            connection.setAutoCommit(false);
+            PreparedStatement ps = connection.prepareStatement(SQL_UPDATE_USERBASE);
+            for (UserBase u : userBases) {
+                ps.setString(1, "1");
+                ps.setString(2, u.getToken());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            connection.commit();
+            close(ps);
+        }
     }
 
     @Override
@@ -142,6 +166,17 @@ public class imp implements SaveDaoInterface {
     }
 
     @Override
+    public LruCacheImp iniTemp(int size) throws Exception {
+        Connection connection = UNPOOLED_DATA_SOURCE.getConnection();
+       PreparedStatement preparedStatement= connection.prepareStatement("select * from USERS limit "+size);
+        LruCacheImp objects=new LruCacheImp<UserBase>(size);
+        objects.addAll(getUserBase(preparedStatement.executeQuery()));
+        close(preparedStatement,connection);
+        return objects;
+
+    }
+
+    @Override
     public void SaveForUserBase(List<UserBase> userBases) throws Exception {
         Connection connection = UNPOOLED_DATA_SOURCE.getConnection();
         //token,index_url,from_id,from_token
@@ -175,10 +210,8 @@ public class imp implements SaveDaoInterface {
         PreparedStatement ps = connection.prepareStatement(String.format(SQL_INIT, userBase.getToken()));
         ResultSet res = ps.executeQuery();
         userBases.addAll(getUserBase(ps.executeQuery()));
-
         ps=connection.prepareStatement("select * FROM  users WHERE  token='"+userBase.getToken()+"'");
 
-        //TODO
         if (userBases.size() == 0&&!ps.executeQuery().next()) {
             ps = connection.prepareStatement(SQL_INSERT_USERBASE);
             ps.setString(1, userBase.getToken());
@@ -190,9 +223,10 @@ public class imp implements SaveDaoInterface {
             ps = connection.prepareStatement(String.format(SQL_INIT, userBase.getToken()));
             userBases.addAll(getUserBase(ps.executeQuery()));
         }else {
-            System.out.println("无法初始化，请换一个id");
+            //TODO
+            userBases.addAll(getNewForUserBase());
         }
-        close(ps, connection);
+        close(ps,connection);
         return userBases;
     }
 
@@ -234,21 +268,6 @@ public class imp implements SaveDaoInterface {
 
     }
 
-    @Override
-    public void UpdateBase(List<UserBase> userBases) throws Exception {
-        Connection connection = UNPOOLED_DATA_SOURCE.getConnection();
-        connection.setAutoCommit(false);
-        PreparedStatement ps = connection.prepareStatement(SQL_UPDATE_USERBASE);
-        for (UserBase u : userBases) {
-            ps.setString(1, "1");
-            ps.setString(2, u.getToken());
-            ps.addBatch();
-        }
-        ps.executeBatch();
-        connection.commit();
-        close(ps);
-
-    }
 
     private void close(AutoCloseable... con) {
         try {

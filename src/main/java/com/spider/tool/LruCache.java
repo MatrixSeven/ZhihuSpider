@@ -3,6 +3,7 @@ package com.spider.tool;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class LruCache<K> {
     private final LinkedHashMap<K, Object> map;
@@ -31,6 +32,11 @@ public class LruCache<K> {
             this.maxSize = maxSize;
         }
         trimToSize(maxSize);
+    }
+
+    public final void putAll(LinkedHashMap<K, Object> t){
+        this.map.putAll(t);
+
     }
     public final Object get(K key) {
         if (key == null) {
@@ -151,8 +157,23 @@ public class LruCache<K> {
 
         return previous;
     }
-    protected void entryRemoved(boolean evicted, K key, Object oldValue, Object newValue) {
 
+    /**
+     * ÒÆ³ýÊý¾Ý
+     * @param evicted
+     * @param key
+     * @param oldValue
+     * @param newValue
+     */
+    protected void entryRemoved(boolean evicted, K key, Object oldValue, Object newValue) {
+        if(evicted&&map.size()>=maxSize){
+            synchronized (this.map){
+                int removestart=maxSize-maxSize/3;
+
+            }
+        }
+    }
+    private void moveToFrist(K key){
     }
 
     protected Object create(K key) {
@@ -217,5 +238,15 @@ public class LruCache<K> {
         int hitPercent = accesses != 0 ? (100 * hitCount / accesses) : 0;
         return String.format("LruCache[maxSize=%d,hits=%d,misses=%d,hitRate=%d%%]",
                 maxSize, hitCount, missCount, hitPercent);
+    }
+
+    class KeyWapoer<K>{
+        public  K value;
+        public AtomicInteger times=new AtomicInteger(0);
+
+        @Override
+        public boolean equals(Object obj) {
+            return this.value.equals(((KeyWapoer)obj).value);
+        }
     }
 }
