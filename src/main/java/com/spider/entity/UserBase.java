@@ -39,6 +39,8 @@ public class UserBase{
 
     @Override
     public boolean equals(Object o){
+        if(o==null)
+            return false;
         return this.token.equals(((UserBase)o).getToken());
     }
 

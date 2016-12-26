@@ -27,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * [Zhihu]https://www.zhihu.com/people/Sweets07
@@ -47,23 +48,23 @@ public class imp implements SaveDaoInterface {
                     "weibo,name,address,education,company,job,headline,user_id,answer,question,art" +
                     "icle,favorite,agree,thanked,following,followers,topic,columns,sex" +
                     ")VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-    private final String SQL_INSERT_USERBASE =
+    private static final String SQL_INSERT_USERBASE =
             "insert INTO users (token,index_url,from_id,from_token) VALUES (?,?,?,?)";
-    private final String SQL_UPDATE_USERBASE =
+    private  static final String SQL_UPDATE_USERBASE =
             "update users set isinit=? where token=?";
-    private final String SQL_INSERT_FOLLOWER =
+    private static  final String SQL_INSERT_FOLLOWER =
             "insert INTO follower (user_token,user_token_follower) VALUES (?,?)";
-    private final String SQL_SELECT_USERBASE =
+    private  static final String SQL_SELECT_USERBASE =
             "SELECT id,token,from_id from_id,from_token FROM users WHERE isinit = '0' group by from_id LIMIT 10000";
             //"select id,token,from_id from_id,from_token from users where isinit='0' and from_id=(select max(from_id) from users where from_id<>'0') limit 500";
-    private final String SQL_ISEXIST_USERBASE =
+    private static  final String SQL_ISEXIST_USERBASE =
             "select * from users where token=?";
-    private final String SQL_UPDATE_USERBASE_PARSER =
+    private  static final String SQL_UPDATE_USERBASE_PARSER =
             "UPDATE users set isparser=? WHERE  token=?";
-    private final String SQL_GET_USERBASE_PARSER =
+    private  static final String SQL_GET_USERBASE_PARSER =
             "select * from users where isparser='0' limit 10000";
 
-    private final String IS_INIT_DB =
+    private  static final String IS_INIT_DB =
             "SELECT w.TABLE_NAME FROM information_schema.TABLES w WHERE w.table_name =? and w.TABLE_SCHEMA=?";
 
     @Override
@@ -229,7 +230,7 @@ public class imp implements SaveDaoInterface {
         close(ps,connection);
         return userBases;
     }
-
+    Random r=new Random();
     public boolean isExist(UserBase userBase) throws Exception {
         Connection connection = UNPOOLED_DATA_SOURCE.getConnection();
         PreparedStatement ps = connection.prepareStatement(SQL_ISEXIST_USERBASE);
@@ -237,6 +238,7 @@ public class imp implements SaveDaoInterface {
         ResultSet resultSet = ps.executeQuery();
         Boolean b = resultSet.next();
         close(resultSet, ps, connection);
+        Thread.sleep(r.nextInt(1500));
         return b;
     }
 

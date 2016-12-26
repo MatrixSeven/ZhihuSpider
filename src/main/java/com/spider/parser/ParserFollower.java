@@ -86,7 +86,6 @@ public class ParserFollower extends ParserBase {
                 }
             }
         }
-
         mc.addType(3, followNexuses);
         mc.addType(1, userBases);
         mc.remove(this.userBase);

@@ -130,7 +130,7 @@ class PooledConnection implements InvocationHandler {
 		if (obj instanceof PooledConnection) {
 			return realConnection.hashCode() == (((PooledConnection) obj).realConnection.hashCode());
 		} else if (obj instanceof Connection) {
-			return hashCode == obj.hashCode();
+			return hashCode== obj.hashCode();
 		} else {
 			return false;
 		}
