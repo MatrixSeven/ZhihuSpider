@@ -113,6 +113,14 @@ public class UserInfo {
      * 性别
      */
     private String sex;
+    /**
+     * token
+     */
+    private String token;
+    /**
+     * z主页
+     */
+    private String index_url;
 
 
 }

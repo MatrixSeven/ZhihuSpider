@@ -69,7 +69,7 @@ public interface SaveDaoInterface {
      * @return
      * @throws Exception
      */
-    void  UpdateParserInfo(List<UserBase> info)throws Exception;
+    long  UpdateParserInfo(List<UserBase> info)throws Exception;
 
     /**
      * 初始化userBase

@@ -30,5 +30,9 @@ public class FollowNexus {
     private String token_id;
     //Nothing
     private String token_flower;
+    //Nothing
+    private String from_name;
+    //Nothing
+    private String name;
 
 }

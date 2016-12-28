@@ -55,11 +55,13 @@ public class ParserFollower extends ParserBase {
         for (int i = 0; i < jsonObject.getJSONArray("data").size(); i++) {
             ub = new UserBase();
             ub.setToken(jsonObject.getJSONArray("data").getJSONObject(i).get("url_token").toString());
+            ub.setName(jsonObject.getJSONArray("data").getJSONObject(i).get("name").toString());
             ub.setUrl("https://www.zhihu.com/people/".concat(ub.getToken()));
             ub.setFrom_id(userBase.getId());
             ub.setFrom_token(userBase.getToken());
+            ub.setFrom_name(userBase.getName());
             userBases.add(ub);
-            followNexuses.add(new FollowNexus(userBase.getToken(), ub.getToken()));
+            followNexuses.add(new FollowNexus(userBase.getToken(), ub.getToken(),ub.getName(),userBase.getName()));
 
         }
 
@@ -74,7 +76,8 @@ public class ParserFollower extends ParserBase {
                 ub.setUrl("https://www.zhihu.com/people/".concat(ub.getToken()));
                 ub.setFrom_id(userBase.getId());
                 ub.setFrom_token(userBase.getToken());
-                followNexuses.add(new FollowNexus(userBase.getToken(), ub.getToken()));
+                followNexuses.add(new FollowNexus(userBase.getToken(), ub.getToken(),ub.getName(),userBase.getName()));
+
                 userBases.add(ub);
                 if (userBases.size() >=5000) {
                     mc.addType(1, userBases);

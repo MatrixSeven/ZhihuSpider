@@ -65,6 +65,8 @@ public class ParserUserInfo extends ParserBase{
         u.setTopic(ParserHelper.Select(doc, "a[href$=topics] strong").replace(" \u4e2a\u8bdd\u9898",""));
         u.setSex(ParserHelper.Select(doc, ".item.gender i", e -> e.attr("class").equals("")?"\u5973":"\u7537"));
         u.setWeibo(ParserHelper.Select(doc, ".zm-profile-header-user-weibo",e->e.attr("href")));
+        u.setToken(userBase.getToken());
+        u.setIndex_url("https://www.zhihu.com/people/".concat(userBase.getToken()));
         return  u;
 
     }

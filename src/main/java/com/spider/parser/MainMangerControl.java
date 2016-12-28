@@ -15,11 +15,13 @@ package com.spider.parser;
 //		   (______|______)
 //=======================================================
 
+
 import com.spider.dao.SaveDaoInterface;
 import com.spider.dao.imp;
 import com.spider.entity.FollowNexus;
 import com.spider.entity.UserBase;
 import com.spider.entity.UserInfo;
+import com.spider.https.ZhiHuHttp;
 import com.spider.tool.Config;
 import com.spider.tool.Console;
 import com.spider.tool.LruCacheImp;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * [Zhihu]https://www.zhihu.com/people/Sweets07
@@ -45,17 +48,15 @@ public class MainMangerControl {
     private SaveDaoInterface daoInterface;
     private int max = 500;
     private int max_active = Integer.valueOf(Config.INSTANCES().getThread_max_active());
-    //parserfollwer
     private static final ThreadPoolExecutor servicePool = (ThreadPoolExecutor) Executors.
             newFixedThreadPool(Integer.valueOf(Config.INSTANCES().getThread_max_active()));
-    //parserinfo
     private static final ThreadPoolExecutor servicePoolInfo = (ThreadPoolExecutor) Executors.
             newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-    public MainMangerControl() {
+    public MainMangerControl() throws Exception{
+        ZhiHuHttp.login();
         userBases = new ArrayList();
         doneBaseUpdate = new ArrayList();
-        //   tempUserBases = new LruCacheImp<>(350000);
         userInfo = new ArrayList();
         followNexuses = new ArrayList();
         daoInterface = new imp();
@@ -85,20 +86,18 @@ public class MainMangerControl {
         return false;
     }
 
-    private boolean isLoadTask = false;
-    private long start = 0L;
-    private long end = 0L;
+    private volatile boolean isLoadTask_ = false;
+    private volatile boolean isLoadTask__ = false;
+    private volatile long time_ = 0L;
 
     private void addTask() {
-        if (isLoadTask)
-            return;
-        isLoadTask = true;
-        new Thread(() -> {
-            try {
-                if (servicePool.getQueue().size() == 0 && servicePool.getActiveCount() < max_active) {
-                    System.out.println("增加任务GetFollower");
+        try {
+            if (servicePool.getQueue().size() == 0 && servicePool.getActiveCount() < max_active) {
+                System.out.println("增加任务GetFollower");
+                if (!isLoadTask_) {
                     synchronized (doneBaseUpdate) {
-                        if (servicePool.getQueue().size() != 0) {
+                        if (servicePool.getQueue().size() == 0) {
+                            isLoadTask_ = true;
                             if (doneBaseUpdate.size() != 0) {
                                 daoInterface.UpdateBase(doneBaseUpdate);
                                 doneBaseUpdate.clear();
@@ -107,31 +106,35 @@ public class MainMangerControl {
                                 this.servicePool.execute(new ParserFollower(u, this));
                             }
                         }
+                        isLoadTask_ = false;
                     }
                 }
-                if (servicePoolInfo.getQueue().size() == 0 && servicePoolInfo.getActiveCount() < max_active) {
+            }
+            if (servicePoolInfo.getQueue().size() == 0 && servicePoolInfo.getActiveCount() <= 4) {
+                if (!isLoadTask__) {
                     synchronized (token) {
                         if (servicePoolInfo.getQueue().size() != 0) {
                             return;
                         }
+                        isLoadTask__ = true;
                         System.out.println("增加任务ParserInfo");
                         if (token.size() != 0) {
-                            daoInterface.UpdateParserInfo(token);
+                            time_ = daoInterface.UpdateParserInfo(token);
                         }
                         token = daoInterface.getParserInfoUserBase();
                         for (UserBase u : token) {
                             this.servicePoolInfo.execute(new ParserUserInfo(u, this));
                         }
+                        isLoadTask__ = false;
                     }
-
-
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                isLoadTask = false;
+
             }
-        }).start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+
+        }
 
     }
 
@@ -144,36 +147,44 @@ public class MainMangerControl {
         }
     }
 
+    private volatile AtomicLong atomicLong = new AtomicLong(0L);
+
     private void addUserBase(List<UserBase> o) throws Exception {
-        synchronized (o) {
-            for (UserBase userBase : o) {
-                if (!isExist(userBase)) {
-                    this.userBases.add(userBase);
-                }
+        for (UserBase userBase : o) {
+            if (!isExist(userBase)) {
+                this.userBases.add(userBase);
             }
-        }
-        if (this.userBases.size() > max) {
-            daoInterface.SaveForUserBase(userBases);
-            this.userBases.clear();
+            atomicLong.incrementAndGet();
         }
 
+        if (this.userBases.size() > max ||
+                (servicePool.getQueue().size() == 0 && servicePool.getActiveCount() < max_active && doneBaseUpdate.size() > 0)) {
+            synchronized (userBases) {
+                daoInterface.SaveForUserBase(userBases);
+                this.userBases.clear();
+            }
+        }
     }
+
 
     private void addUserInfo(UserInfo o) throws Exception {
         if (this.userInfo.size() > max) {
-            synchronized (o){
-            daoInterface.SaveForUser(userInfo);
-            this.userInfo.clear();
+            synchronized (o) {
+                daoInterface.SaveForUser(userInfo);
+                this.userInfo.clear();
             }
         }
         this.userInfo.add(o);
+
     }
 
     private void addUserFollower(List<FollowNexus> o) throws Exception {
         this.followNexuses.addAll(o);
         if (this.followNexuses.size() > max) {
-            daoInterface.SaveForFollow(followNexuses);
-            this.followNexuses.clear();
+            synchronized (followNexuses) {
+                daoInterface.SaveForFollow(followNexuses);
+                this.followNexuses.clear();
+            }
 
         }
     }
@@ -205,9 +216,18 @@ public class MainMangerControl {
 
     public void printStatus() {
         new Thread(() -> {
+            while (true) {
+                addTask();
+                try {
+                    Thread.sleep(10000);
+                } catch (Exception e) {
+
+                }
+            }
+        }).start();
+        new Thread(() -> {
             try {
                 while (true) {
-                    addTask();
                     Console.clear();
                     System.out.println(
                             "最小线程数：" + servicePool.getCorePoolSize() + "\n" +
@@ -216,6 +236,8 @@ public class MainMangerControl {
                                     "总任务数：" + servicePool.getTaskCount() + "\n" +
                                     "活跃线程数：" + servicePool.getActiveCount() + "\n" +
                                     "完成线程数：" + servicePool.getCompletedTaskCount() + "\n" +
+                                    "距离存库还有: " + (500 - userBases.size()) + "\n" +
+                                    "遇到重复数据: " + atomicLong.intValue() + "\n" +
                                     "缓存大小:" + tempUserBases.size() + "\n" +
                                     this.tempUserBases.toString() + "\n" +
                                     "========================================================\n" +
@@ -224,7 +246,8 @@ public class MainMangerControl {
                                     "任务队列大小：" + servicePoolInfo.getQueue().size() + "\n" +
                                     "总任务数：" + servicePoolInfo.getTaskCount() + "\n" +
                                     "活跃线程数：" + servicePoolInfo.getActiveCount() + "\n" +
-                                    "完成线程数：" + servicePoolInfo.getCompletedTaskCount() + "\n"
+                                    "完成线程数：" + servicePoolInfo.getCompletedTaskCount() + "\n" +
+                                    "更新花费时间" + time_ + "s" + "\n"
                     );
 
                     System.out.println("运行" + (System.currentTimeMillis() - time) / 1000.00 + "S");

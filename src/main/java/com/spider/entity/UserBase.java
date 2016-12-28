@@ -32,6 +32,8 @@ public class UserBase{
     private String id;
     private String from_id;
     private String from_token;
+    private String from_name;
+    private String name;
 
     public UserBase(String token){
         this.token=token;

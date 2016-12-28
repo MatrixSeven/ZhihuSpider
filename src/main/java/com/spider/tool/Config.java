@@ -31,6 +31,7 @@ public class Config {
     private String db_user_name;
     private String db_user_pass;
     private String thread_max_active;
+    private String user_info_size;
     private String star_token;
     private String yzm_path;
     private String cookie_path;
@@ -58,6 +59,7 @@ public class Config {
             this.zhihu_name = p.getProperty("zhihu_name");
             this.zhihu_pass = p.getProperty("zhihu_pass");
             this.isOnlyParser=p.getProperty("isOnlyParser");
+            this.user_info_size=p.getProperty("user_info_size");
 
         } catch (Exception e) {
             e.printStackTrace();

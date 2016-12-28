@@ -9,7 +9,7 @@ package com.spider.https;
 //		        `;_:    `"'
 //		      .'"""""`.
 //		     /,  ya ,\\
-//		    //鐙楃淇濅綉\\
+//		    //??????\\
 //		    `-._______.-'
 //		    ___`. | .'___
 //		   (______|______)
@@ -50,7 +50,7 @@ import java.util.Scanner;
 //		        `;_:    `"'
 //		      .'"""""`.
 //		     /,  ya ,\\
-//		    //鐙楃淇濅綉\\
+//		    //??????\\
 //		    `-._______.-'
 //		    ___`. | .'___
 //		   (______|______)
@@ -60,7 +60,7 @@ import java.util.Scanner;
  * [Zhihu]https://www.zhihu.com/people/Sweets07
  * [Github]https://github.com/MatrixSeven
  * Created by seven on 2016/11/29.
- * 浠呬粎鎻愪緵context
+ * ??????context
  */
 public class ZhiHuHttp {
     final private static String INDEX_URL = "https://www.zhihu.com";
@@ -78,7 +78,12 @@ public class ZhiHuHttp {
         }
 
     }
-    private ZhiHuHttp() {
+    public ZhiHuHttp() {
+       try {
+           login();
+       }catch (Exception e){
+           e.printStackTrace();
+       }
 
     }
 
@@ -95,14 +100,14 @@ public class ZhiHuHttp {
     public static void login() throws Exception {
         httpClientContext = HttpUtil.getHttpClientContext();
         if (HttpUtil.deserializeCookie(CONFIG.getCookie_path(), httpClientContext)) {
-            System.out.println("鍙戠幇cookie");
+            System.out.println("加载cookie");
             initAuthCookie();
             return;
         }
 
         CloseableHttpClient closeableHttpClient = HttpUtil.getHttpClient();
         CloseableHttpResponse closeableHttpResponse;
-        System.out.println("鐧婚檰....");
+        System.out.println("登陆中....");
         HttpGet get = new HttpGet(URI.create(INDEX_URL));
         Document doc = Jsoup.parse(EntityUtils.toString(closeableHttpClient.execute(get, httpClientContext).getEntity()));
         String xsf = doc.select("input[name=_xsrf]").first().attr("value");
@@ -112,7 +117,10 @@ public class ZhiHuHttp {
         HttpUtil.downloadFile(closeableHttpClient, httpClientContext, YZM_URL, imgPath, "YZM.jpg", true);
         List<NameValuePair> formParams = new ArrayList<NameValuePair>();
         Scanner sc = new Scanner(System.in);
-        System.out.println("璇疯緭鍏ワ細");
+        if(pass==null||username==null||pass.equals("")||username.equals("")){
+            throw  new Exception("请输入完整的用户名和密码");
+        }
+        System.out.println("请输入验证码");
         String Yzm = sc.nextLine();
         formParams.add(new BasicNameValuePair("captcha", Yzm));
         formParams.add(new BasicNameValuePair("_xsrf", xsf));
@@ -123,6 +131,9 @@ public class ZhiHuHttp {
         request.setEntity( new UrlEncodedFormEntity(formParams, "utf-8"));
         String res = EntityUtils.toString((closeableHttpResponse = closeableHttpClient.execute(request, httpClientContext)).getEntity());
         System.out.println(res);
+        if(res.indexOf("errcode")!=-1){
+            throw  new Exception("登陆失败，请检查信息，程序退出");
+        }
         HttpUtil.serializeCookie(httpClientContext.getCookieStore(),
                 CONFIG.getCookie_path());
         initAuthCookie();

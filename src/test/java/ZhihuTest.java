@@ -15,6 +15,7 @@
 //=======================================================
 
 import com.spider.dao.imp;
+import com.spider.entity.UserBase;
 import com.spider.entity.UserInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,6 +48,12 @@ public class ZhihuTest {
         u.setName("1");
         u.setFollowing("1");
         s.add(u);
-        imp.SaveForUser(s);
+       // imp.SaveForUser(s);
+        List<UserBase> userBases=new ArrayList<>();
+        UserBase userBase=new UserBase("66666");
+        userBase.setFrom_id("64554");
+        userBase.setFrom_token("from_token");
+        userBases.add(userBase);
+        imp.SaveForUserBase(userBases);
     }
 }

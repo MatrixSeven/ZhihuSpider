@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50018
 File Encoding         : 65001
 
-Date: 2016-12-11 20:13:42
+Date: 2016-12-28 21:49:11
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -36,7 +36,8 @@ CREATE TABLE `users` (
   `from_id` int(255) NOT NULL,
   `from_token` varchar(255) NOT NULL,
   `isparser` int(1) default '0',
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`id`),
+  KEY `users_token_index` (`token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
@@ -63,5 +64,7 @@ CREATE TABLE `users_info` (
   `columns` varchar(255) default NULL,
   `sex` varchar(255) default NULL,
   `updatetime` timestamp NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  `weibo` varchar(255) default NULL
+  `weibo` varchar(255) default NULL,
+  `token` varchar(255) default NULL,
+  `index_url` varchar(255) default NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
