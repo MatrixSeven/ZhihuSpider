@@ -168,7 +168,7 @@ public class LruCache<K> {
     protected void entryRemoved(boolean evicted, K key, Object oldValue, Object newValue) {
         if(evicted&&map.size()>=maxSize){
             synchronized (this.map){
-                int removestart=maxSize-maxSize/3;
+                int removeStart=maxSize-maxSize/3;
 
             }
         }

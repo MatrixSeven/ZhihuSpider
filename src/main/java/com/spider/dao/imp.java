@@ -36,37 +36,18 @@ import java.util.Random;
  */
 public class imp implements SaveDaoInterface {
     private static final Config CONFIG = Config.INSTANCES();
-    private static final UnpooledDataSource UNPOOLED_DATA_SOURCE = new
-            UnpooledDataSource("com.mysql.jdbc.Driver",
-            (CONFIG.getDb_url().concat(CONFIG.getDb_name())),
-            CONFIG.getDb_user_name(), CONFIG.getDb_user_pass());
+    private static final UnpooledDataSource UNPOOLED_DATA_SOURCE = new UnpooledDataSource("com.mysql.jdbc.Driver",(CONFIG.getDb_url().concat(CONFIG.getDb_name())),CONFIG.getDb_user_name(), CONFIG.getDb_user_pass());
     private static final Object look = new Object();
-    private final String SQL_INIT =
-            "select * from users where isinit=0 and token='%s'";
-    private final String SQL_INSERT_USERINFO =
-            "INSERT INTO users_info(\n" +
-                    "weibo,name,address,education,company,job,headline,user_id,answer,question,art" +
-                    "icle,favorite,agree,thanked,following,followers,topic,columns,sex,token,index_url" +
-                    ")VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-    private static final String SQL_INSERT_USERBASE =
-            "insert INTO users (token,index_url,from_id,from_token) VALUES (?,?,?,?)";
-    private static final String SQL_UPDATE_USERBASE =
-            "update users set isinit=? where token=?";
-    private static final String SQL_INSERT_FOLLOWER =
-            "insert INTO follower (user_token,user_token_follower) VALUES (?,?)";
-    private static final String SQL_SELECT_USERBASE =
-            //    "SELECT id,token,from_id from_id,from_token FROM users WHERE isinit = '0' group by from_id LIMIT 10000";
-            "SELECT id,token,from_id from_id,from_token FROM users WHERE isinit = '0'  ORDER BY id LIMIT 10000";
-    //"select id,token,from_id from_id,from_token from users where isinit='0' and from_id=(select max(from_id) from users where from_id<>'0') limit 500";
-    private static final String SQL_ISEXIST_USERBASE =
-            "select * from users where token=?";
-    private static final String SQL_UPDATE_USERBASE_PARSER =
-            "UPDATE users set isparser=? WHERE  token=?";
-    private static final String SQL_GET_USERBASE_PARSER =
-            "select * from users where isparser='0' limit ".concat(CONFIG.getUser_info_size());
-
-    private static final String IS_INIT_DB =
-            "SELECT w.TABLE_NAME FROM information_schema.TABLES w WHERE w.table_name =? and w.TABLE_SCHEMA=?";
+    private static final String SQL_INIT = "select * from users where isinit=0 and token='%s'";
+    private static final String SQL_INSERT_USERINFO ="INSERT INTO users_info(weibo,name,address,education,company,job,headline,user_id,answer,question,article,favorite,agree,thanked,following,followers,topic,columns,sex,token,index_url)VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    private static final String SQL_INSERT_USERBASE ="insert INTO users (token,index_url,from_id,from_token) VALUES (?,?,?,?)";
+    private static final String SQL_UPDATE_USERBASE ="update users set isinit=? where token=?";
+    private static final String SQL_INSERT_FOLLOWER ="insert INTO follower (user_token,user_token_follower) VALUES (?,?)";
+    private static final String SQL_SELECT_USERBASE ="SELECT id,token,from_id from_id,from_token FROM users WHERE isinit = '0'  ORDER BY id LIMIT 10000";
+    private static final String SQL_ISEXIST_USERBASE ="select * from users where token=?";
+    private static final String SQL_UPDATE_USERBASE_PARSER ="UPDATE users set isparser=? WHERE  token=?";
+    private static final String SQL_GET_USERBASE_PARSER ="select * from users where isparser='0' limit ".concat(CONFIG.getUser_info_size());
+    private static final String IS_INIT_DB ="SELECT w.TABLE_NAME FROM information_schema.TABLES w WHERE w.table_name =? and w.TABLE_SCHEMA=?";
 
     @Override
     public long UpdateParserInfo(List<UserBase> info) throws Exception {
@@ -91,7 +72,7 @@ public class imp implements SaveDaoInterface {
             connection.commit();
             close(ps, connection);
         }
-        return  (System.currentTimeMillis()-star)/1000L;
+        return (System.currentTimeMillis() - star) / 1000L;
     }
 
     @Override
@@ -253,7 +234,7 @@ public class imp implements SaveDaoInterface {
         ResultSet resultSet = ps.executeQuery();
         Boolean b = resultSet.next();
         close(resultSet, ps, connection);
-       Thread.sleep(500);
+        Thread.sleep(500);
 
         return b;
     }
@@ -282,6 +263,7 @@ public class imp implements SaveDaoInterface {
         if (preparedStatement.executeQuery().next()) {
             return;
         }
+
         //TODO Create Table
 
 

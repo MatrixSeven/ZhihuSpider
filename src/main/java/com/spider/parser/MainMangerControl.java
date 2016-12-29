@@ -45,8 +45,13 @@ public class MainMangerControl {
     private volatile List<UserBase> token;
     private volatile LruCacheImp<UserBase> tempUserBases;
     private volatile List<FollowNexus> followNexuses;
+    private volatile AtomicLong atomicLong = new AtomicLong(0L);
+    private volatile boolean isLoadTask_ = false;
+    private volatile boolean isLoadTask__ = false;
+    private volatile long time_ = 0L;
     private SaveDaoInterface daoInterface;
     private int max = 500;
+    private boolean isOnlyParser=Config.INSTANCES().getIsOnlyParser();
     private int max_active = Integer.valueOf(Config.INSTANCES().getThread_max_active());
     private static final ThreadPoolExecutor servicePool = (ThreadPoolExecutor) Executors.
             newFixedThreadPool(Integer.valueOf(Config.INSTANCES().getThread_max_active()));
@@ -64,7 +69,7 @@ public class MainMangerControl {
     }
 
     public void star() {
-        if (Config.INSTANCES().getIsOnlyParser().equals("false")) {
+        if (!isOnlyParser){
             try {
                 tempUserBases = daoInterface.iniTemp(350000);
                 for (UserBase u : daoInterface.Init(new UserBase(Config.INSTANCES().getStar_token())))
@@ -86,13 +91,10 @@ public class MainMangerControl {
         return false;
     }
 
-    private volatile boolean isLoadTask_ = false;
-    private volatile boolean isLoadTask__ = false;
-    private volatile long time_ = 0L;
 
     private void addTask() {
         try {
-            if (servicePool.getQueue().size() == 0 && servicePool.getActiveCount() < max_active) {
+            if (servicePool.getQueue().size() == 0 && servicePool.getActiveCount() < max_active&&!isOnlyParser) {
                 System.out.println("增加任务GetFollower");
                 if (!isLoadTask_) {
                     synchronized (doneBaseUpdate) {
@@ -139,24 +141,19 @@ public class MainMangerControl {
     }
 
     public void remove(UserBase o) throws Exception {
-        this.userBases.remove(o);
+        //清除数据
+        userBases.remove(o);
         doneBaseUpdate.add(o);
+        //更新base
         if (this.doneBaseUpdate.size() > max) {
             daoInterface.UpdateBase(doneBaseUpdate);
             doneBaseUpdate.clear();
         }
     }
 
-    private volatile AtomicLong atomicLong = new AtomicLong(0L);
+
 
     private void addUserBase(List<UserBase> o) throws Exception {
-        for (UserBase userBase : o) {
-            if (!isExist(userBase)) {
-                this.userBases.add(userBase);
-            }
-            atomicLong.incrementAndGet();
-        }
-
         if (this.userBases.size() > max ||
                 (servicePool.getQueue().size() == 0 && servicePool.getActiveCount() < max_active && doneBaseUpdate.size() > 0)) {
             synchronized (userBases) {
@@ -164,9 +161,13 @@ public class MainMangerControl {
                 this.userBases.clear();
             }
         }
+        for (UserBase userBase : o) {
+            if (!isExist(userBase)) {
+                this.userBases.add(userBase);
+            }
+            atomicLong.incrementAndGet();
+        }
     }
-
-
     private void addUserInfo(UserInfo o) throws Exception {
         if (this.userInfo.size() > max) {
             synchronized (o) {
@@ -177,7 +178,6 @@ public class MainMangerControl {
         this.userInfo.add(o);
 
     }
-
     private void addUserFollower(List<FollowNexus> o) throws Exception {
         this.followNexuses.addAll(o);
         if (this.followNexuses.size() > max) {
@@ -185,18 +185,8 @@ public class MainMangerControl {
                 daoInterface.SaveForFollow(followNexuses);
                 this.followNexuses.clear();
             }
-
         }
     }
-
-    /**
-     * 1 userbase
-     * 2 userinfo
-     * 3 follower
-     *
-     * @param type
-     * @param obj
-     */
     public void addType(Integer type, Object obj) throws Exception {
         switch (type) {
             case 1:
@@ -236,7 +226,7 @@ public class MainMangerControl {
                                     "总任务数：" + servicePool.getTaskCount() + "\n" +
                                     "活跃线程数：" + servicePool.getActiveCount() + "\n" +
                                     "完成线程数：" + servicePool.getCompletedTaskCount() + "\n" +
-                                    "距离存库还有: " + (500 - userBases.size()) + "\n" +
+                                    "距离存库还有: " + (max - userBases.size()) + "\n" +
                                     "遇到重复数据: " + atomicLong.intValue() + "\n" +
                                     "缓存大小:" + tempUserBases.size() + "\n" +
                                     this.tempUserBases.toString() + "\n" +
@@ -247,7 +237,7 @@ public class MainMangerControl {
                                     "总任务数：" + servicePoolInfo.getTaskCount() + "\n" +
                                     "活跃线程数：" + servicePoolInfo.getActiveCount() + "\n" +
                                     "完成线程数：" + servicePoolInfo.getCompletedTaskCount() + "\n" +
-                                    "更新花费时间" + time_ + "s" + "\n"
+                                    "更新花费时间:" + time_ + "s" + "\n"
                     );
 
                     System.out.println("运行" + (System.currentTimeMillis() - time) / 1000.00 + "S");
