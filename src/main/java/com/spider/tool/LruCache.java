@@ -1,28 +1,47 @@
-
 package com.spider.tool;
+//=======================================================
+//		          .----.
+//		       _.'__    `.
+//		   .--(^)(^^)---/!\
+//		 .' @          /!!!\
+//		 :         ,    !!!!
+//		  `-..__.-' _.-\!!!/
+//		        `;_:    `"'
+//		      .'"""""`.
+//		     /,  ya ,\\
+//		    //狗神保佑\\
+//		    `-._______.-'
+//		    ___`. | .'___
+//		   (______|______)
+//=======================================================
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LruCache<K> {
+public class LRUCache<K> {
     private final LinkedHashMap<K, Object> map;
-    private int size;
+    private volatile int size;
     private int maxSize;
-    private int putCount;
-    private int createCount;
-    private int evictionCount;
-    private int hitCount;
-    private int missCount;
-    private final Object object=new Object();
+    private volatile AtomicInteger putCount=new AtomicInteger(0);
+    private volatile AtomicInteger evictionCount=new AtomicInteger(0);;
+    private volatile AtomicInteger hitCount=new AtomicInteger(0);;
+    private volatile AtomicInteger missCount=new AtomicInteger(0);;
+    private final Object value = new Object();
 
-    public LruCache(int maxSize) {
+    public LRUCache(int maxSize) {
         if (maxSize <= 0) {
             throw new IllegalArgumentException("maxSize <= 0");
         }
         this.maxSize = maxSize;
-        this.map = new LinkedHashMap<K,Object>(maxSize, 0.75f, true);
+        this.map = new LinkedHashMap(maxSize, 0.75f, true);
     }
+
+    public void init(List<K> list) {
+        list.stream().forEach(a -> this.map.put(a, value));
+    }
+
     public void resize(int maxSize) {
         if (maxSize <= 0) {
             throw new IllegalArgumentException("maxSize <= 0");
@@ -34,63 +53,33 @@ public class LruCache<K> {
         trimToSize(maxSize);
     }
 
-    public final void putAll(LinkedHashMap<K, Object> t){
-        this.map.putAll(t);
-
-    }
-    public final Object get(K key) {
+    public final Boolean get(K key) {
         if (key == null) {
             throw new NullPointerException("key == null");
         }
+
         Object mapValue;
         synchronized (this) {
             mapValue = map.get(key);
             if (mapValue != null) {
-                hitCount++;
-                return mapValue;
+                hitCount.incrementAndGet();
+                return true;
             }
-            missCount++;
+            this.put(key);
+            missCount.incrementAndGet();
         }
-        Object createdValue = create(key);
-        if (createdValue == null) {
-            return null;
-        }
-
-        synchronized (this) {
-            createCount++;
-            mapValue = map.put(key, createdValue);
-
-            if (mapValue != null) {
-                map.put(key, mapValue);
-            } else {
-                size += safeSizeOf(key, createdValue);
-            }
-        }
-
-        if (mapValue != null) {
-            entryRemoved(false, key, createdValue, mapValue);
-            return mapValue;
-        } else {
-            trimToSize(maxSize);
-            return createdValue;
-        }
+        return false;
     }
-    //containsKey
-    public final boolean containsKey(K key){
-        if( get(key)==null){
-            put(key,object);
-            return false;
-        }
-        return  true;
-    }
-    public final Object put(K key, Object value) {
-        if (key == null || value == null) {
-            throw new NullPointerException("key == null || value == null");
+
+
+    public final Object put(K key) {
+        if (key == null) {
+            throw new NullPointerException("key == null");
         }
 
         Object previous;
         synchronized (this) {
-            putCount++;
+            putCount.incrementAndGet();
             size += safeSizeOf(key, value);
             previous = map.put(key, value);
             if (previous != null) {
@@ -105,33 +94,25 @@ public class LruCache<K> {
         trimToSize(maxSize);
         return previous;
     }
-    private void trimToSize(int maxSize) {
+
+    public void trimToSize(int maxSize) {
         while (true) {
             K key;
-            Object value;
             synchronized (this) {
                 if (size < 0 || (map.isEmpty() && size != 0)) {
                     throw new IllegalStateException(getClass().getName()
                             + ".sizeOf() is reporting inconsistent results!");
                 }
 
-                if (size <= maxSize) {
+                if (size <= maxSize || map.isEmpty()) {
                     break;
                 }
 
-                Map.Entry<K, Object> toEvict = null;
-                for (Map.Entry<K, Object> entry : map.entrySet()) {
-                    toEvict = entry;
-                }
-                if (toEvict == null) {
-                    break;
-                }
-
+                Map.Entry<K, Object> toEvict = map.entrySet().iterator().next();
                 key = toEvict.getKey();
-                value = toEvict.getValue();
                 map.remove(key);
                 size -= safeSizeOf(key, value);
-                evictionCount++;
+                evictionCount.intValue();
             }
 
             entryRemoved(true, key, value, null);
@@ -158,22 +139,8 @@ public class LruCache<K> {
         return previous;
     }
 
-    /**
-     * 移除数据
-     * @param evicted
-     * @param key
-     * @param oldValue
-     * @param newValue
-     */
     protected void entryRemoved(boolean evicted, K key, Object oldValue, Object newValue) {
-        if(evicted&&map.size()>=maxSize){
-            synchronized (this.map){
-                int removeStart=maxSize-maxSize/3;
-
-            }
-        }
-    }
-    private void moveToFrist(K key){
+        remove(key);
     }
 
     protected Object create(K key) {
@@ -192,40 +159,36 @@ public class LruCache<K> {
         return 1;
     }
 
-
     public final void evictAll() {
-        trimToSize(-1); // -1 will evict 0-sized elements
+        trimToSize(-1);
+    }
+
+    public synchronized final int mapSize() {
+        return this.map.size();
     }
 
     public synchronized final int size() {
         return size;
     }
 
-
     public synchronized final int maxSize() {
         return maxSize;
     }
 
-
     public synchronized final int hitCount() {
-        return hitCount;
+        return hitCount.intValue();
     }
 
     public synchronized final int missCount() {
-        return missCount;
-    }
-
-    public synchronized final int createCount() {
-        return createCount;
+        return missCount.intValue();
     }
 
     public synchronized final int putCount() {
-        return putCount;
+        return putCount.intValue();
     }
 
-
     public synchronized final int evictionCount() {
-        return evictionCount;
+        return evictionCount.intValue();
     }
 
     public synchronized final Map<K, Object> snapshot() {
@@ -233,20 +196,10 @@ public class LruCache<K> {
     }
 
     @Override
-    public synchronized final String toString() {
-        int accesses = hitCount + missCount;
-        int hitPercent = accesses != 0 ? (100 * hitCount / accesses) : 0;
+    public final String toString() {
+        int accesses = hitCount.intValue() + missCount.intValue();
+        int hitPercent = accesses != 0 ? (100 * hitCount.intValue() / accesses) : 0;
         return String.format("LruCache[maxSize=%d,hits=%d,misses=%d,hitRate=%d%%]",
-                maxSize, hitCount, missCount, hitPercent);
-    }
-
-    class KeyWapoer<K>{
-        public  K value;
-        public AtomicInteger times=new AtomicInteger(0);
-
-        @Override
-        public boolean equals(Object obj) {
-            return this.value.equals(((KeyWapoer)obj).value);
-        }
+                maxSize, hitCount.intValue(), missCount.intValue(), hitPercent);
     }
 }

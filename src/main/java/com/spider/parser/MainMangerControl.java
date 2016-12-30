@@ -24,7 +24,7 @@ import com.spider.entity.UserInfo;
 import com.spider.https.ZhiHuHttp;
 import com.spider.tool.Config;
 import com.spider.tool.Console;
-import com.spider.tool.LruCacheImp;
+import com.spider.tool.LRUCache;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +43,7 @@ public class MainMangerControl {
     private volatile List<UserBase> doneBaseUpdate;
     private volatile List<UserInfo> userInfo;
     private volatile List<UserBase> token;
-    private volatile LruCacheImp<UserBase> tempUserBases;
+    private volatile LRUCache<UserBase> tempUserBases;
     private volatile List<FollowNexus> followNexuses;
     private volatile AtomicLong atomicLong = new AtomicLong(0L);
     private volatile boolean isLoadTask_ = false;
@@ -51,14 +51,14 @@ public class MainMangerControl {
     private volatile long time_ = 0L;
     private SaveDaoInterface daoInterface;
     private int max = 500;
-    private boolean isOnlyParser=Config.INSTANCES().getIsOnlyParser();
+    private boolean isOnlyParser = Config.INSTANCES().getIsOnlyParser();
     private int max_active = Integer.valueOf(Config.INSTANCES().getThread_max_active());
     private static final ThreadPoolExecutor servicePool = (ThreadPoolExecutor) Executors.
             newFixedThreadPool(Integer.valueOf(Config.INSTANCES().getThread_max_active()));
     private static final ThreadPoolExecutor servicePoolInfo = (ThreadPoolExecutor) Executors.
             newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-    public MainMangerControl() throws Exception{
+    public MainMangerControl() throws Exception {
         ZhiHuHttp.login();
         userBases = new ArrayList();
         doneBaseUpdate = new ArrayList();
@@ -66,12 +66,13 @@ public class MainMangerControl {
         followNexuses = new ArrayList();
         daoInterface = new imp();
         token = new ArrayList<>(512);
+        tempUserBases = new LRUCache<>(350000);
     }
 
     public void star() {
-        if (!isOnlyParser){
+        if (!isOnlyParser) {
             try {
-                tempUserBases = daoInterface.iniTemp(350000);
+                tempUserBases.init(daoInterface.iniTemp(350000));
                 for (UserBase u : daoInterface.Init(new UserBase(Config.INSTANCES().getStar_token())))
                     this.servicePool.execute(new ParserFollower(u, this));
 
@@ -85,7 +86,7 @@ public class MainMangerControl {
     }
 
     public boolean isExist(UserBase userBase) throws Exception {
-        if (tempUserBases.containsKey(userBase) || daoInterface.isExist(userBase)) {
+        if (tempUserBases.get(userBase) || daoInterface.isExist(userBase)) {
             return true;
         }
         return false;
@@ -94,7 +95,7 @@ public class MainMangerControl {
 
     private void addTask() {
         try {
-            if (servicePool.getQueue().size() == 0 && servicePool.getActiveCount() < max_active&&!isOnlyParser) {
+            if (servicePool.getQueue().size() == 0 && servicePool.getActiveCount() < max_active && !isOnlyParser) {
                 System.out.println("增加任务GetFollower");
                 if (!isLoadTask_) {
                     synchronized (doneBaseUpdate) {
@@ -152,7 +153,6 @@ public class MainMangerControl {
     }
 
 
-
     private void addUserBase(List<UserBase> o) throws Exception {
         if (this.userBases.size() > max ||
                 (servicePool.getQueue().size() == 0 && servicePool.getActiveCount() < max_active && doneBaseUpdate.size() > 0)) {
@@ -168,6 +168,7 @@ public class MainMangerControl {
             atomicLong.incrementAndGet();
         }
     }
+
     private void addUserInfo(UserInfo o) throws Exception {
         if (this.userInfo.size() > max) {
             synchronized (o) {
@@ -178,6 +179,7 @@ public class MainMangerControl {
         this.userInfo.add(o);
 
     }
+
     private void addUserFollower(List<FollowNexus> o) throws Exception {
         this.followNexuses.addAll(o);
         if (this.followNexuses.size() > max) {
@@ -187,6 +189,7 @@ public class MainMangerControl {
             }
         }
     }
+
     public void addType(Integer type, Object obj) throws Exception {
         switch (type) {
             case 1:
@@ -205,16 +208,7 @@ public class MainMangerControl {
 
 
     public void printStatus() {
-        new Thread(() -> {
-            while (true) {
-                addTask();
-                try {
-                    Thread.sleep(10000);
-                } catch (Exception e) {
 
-                }
-            }
-        }).start();
         new Thread(() -> {
             try {
                 while (true) {
@@ -239,15 +233,22 @@ public class MainMangerControl {
                                     "完成线程数：" + servicePoolInfo.getCompletedTaskCount() + "\n" +
                                     "更新花费时间:" + time_ + "s" + "\n"
                     );
-
                     System.out.println("运行" + (System.currentTimeMillis() - time) / 1000.00 + "S");
-
                     Thread.sleep(3000);
                 }
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
         }).start();
+        new Thread(() -> {
+            while (true) {
+                addTask();
+                try {
+                    Thread.sleep(50000);
+                } catch (Exception e) {
 
+                }
+            }
+        }).start();
     }
 }

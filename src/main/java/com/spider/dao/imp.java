@@ -20,7 +20,6 @@ import com.spider.entity.FollowNexus;
 import com.spider.entity.UserBase;
 import com.spider.entity.UserInfo;
 import com.spider.tool.Config;
-import com.spider.tool.LruCacheImp;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -158,10 +157,10 @@ public class imp implements SaveDaoInterface {
     }
 
     @Override
-    public LruCacheImp iniTemp(int size) throws Exception {
+    public List<UserBase> iniTemp(int size) throws Exception {
         Connection connection = UNPOOLED_DATA_SOURCE.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement("select * from USERS limit " + size);
-        LruCacheImp objects = new LruCacheImp<UserBase>(size);
+        List<UserBase> objects = new ArrayList<>(size);
         objects.addAll(getUserBase(preparedStatement.executeQuery()));
         close(preparedStatement, connection);
         return objects;
