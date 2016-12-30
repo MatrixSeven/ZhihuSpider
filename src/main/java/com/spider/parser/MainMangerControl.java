@@ -220,7 +220,6 @@ public class MainMangerControl {
                                     "总任务数：" + servicePool.getTaskCount() + "\n" +
                                     "活跃线程数：" + servicePool.getActiveCount() + "\n" +
                                     "完成线程数：" + servicePool.getCompletedTaskCount() + "\n" +
-                                    "距离存库还有: " + (max - userBases.size()) + "\n" +
                                     "遇到重复数据: " + atomicLong.intValue() + "\n" +
                                     "缓存大小:" + tempUserBases.size() + "\n" +
                                     this.tempUserBases.toString() + "\n" +
