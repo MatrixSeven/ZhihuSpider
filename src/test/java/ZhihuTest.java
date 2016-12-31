@@ -19,7 +19,6 @@ import com.spider.dao.imp;
 import com.spider.entity.UserBase;
 import com.spider.entity.UserInfo;
 import com.spider.tool.Config;
-import com.spider.tool.LRUCache;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
@@ -91,62 +90,5 @@ public class ZhihuTest {
         }
 //        System.out.println(hashMaps);
         ExcelFactory.saveExcel(hashMaps, "/seven007.xlsx").Save();
-    }
-
-
-    @Test
-    public void test_03() {
-
-        LRUCache<UserBase> stringLRUCache = new LRUCache<UserBase>(3);
-        stringLRUCache.get(new UserBase(""));
-        stringLRUCache.get(new UserBase(""));
-        stringLRUCache.get(new UserBase(""));
-        stringLRUCache.get(new UserBase(""));
-        stringLRUCache.get(new UserBase("1"));
-        stringLRUCache.get(new UserBase("1"));
-        stringLRUCache.get(new UserBase("2"));
-        stringLRUCache.get(new UserBase("3"));
-        stringLRUCache.get(new UserBase(""));
-        stringLRUCache.get(new UserBase(""));
-        stringLRUCache.get(new UserBase(""));
-        stringLRUCache.get(new UserBase("1"));
-        stringLRUCache.get(new UserBase("1"));
-        stringLRUCache.get(new UserBase("2"));
-        stringLRUCache.get(new UserBase("3"));
-        stringLRUCache.get(new UserBase(""));
-        stringLRUCache.get(new UserBase(""));
-        stringLRUCache.get(new UserBase(""));
-        stringLRUCache.get(new UserBase("1"));
-        stringLRUCache.get(new UserBase("1"));
-        stringLRUCache.get(new UserBase("2"));
-        stringLRUCache.get(new UserBase("3"));
-        stringLRUCache.get(new UserBase(""));
-        stringLRUCache.get(new UserBase(""));
-        stringLRUCache.get(new UserBase(""));
-        stringLRUCache.get(new UserBase("1"));
-        stringLRUCache.get(new UserBase("1"));
-        stringLRUCache.get(new UserBase("2"));
-        stringLRUCache.get(new UserBase("3"));
-        stringLRUCache.get(new UserBase("efsdf"));
-        stringLRUCache.get(new UserBase("4"));
-        stringLRUCache.get(new UserBase("d22222"));
-        stringLRUCache.get(new UserBase("dw"));
-        stringLRUCache.get(new UserBase("dw"));
-        new Thread(()->stringLRUCache.get(new UserBase("dw"))).start();
-        new Thread(()->stringLRUCache.get(new UserBase("dwdf"))).start();
-        new Thread(()->stringLRUCache.get(new UserBase("ddfw"))).start();
-        new Thread(()->stringLRUCache.get(new UserBase("dwdf"))).start();
-        new Thread(()->stringLRUCache.get(new UserBase("ddfw"))).start();
-        new Thread(()->stringLRUCache.get(new UserBase("dw"))).start();
-        new Thread(()->stringLRUCache.get(new UserBase("dw"))).start();
-        new Thread(()->stringLRUCache.get(new UserBase("ddfw"))).start();
-        new Thread(()->stringLRUCache.get(new UserBase("ddfw"))).start();
-        new Thread(()->stringLRUCache.get(new UserBase("dw"))).start();
-        new Thread(()->stringLRUCache.get(new UserBase("ddfdfw"))).start();
-        new Thread(()->stringLRUCache.get(new UserBase("ddfw"))).start();
-        new Thread(()->stringLRUCache.get(new UserBase("ddfw"))).start();
-
-        System.out.println(stringLRUCache.mapSize());
-        System.out.println(stringLRUCache);
     }
 }

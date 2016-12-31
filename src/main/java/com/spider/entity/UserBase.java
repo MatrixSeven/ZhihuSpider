@@ -15,15 +15,19 @@ package com.spider.entity;
 //		   (______|______)
 //=======================================================
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * [Zhihu]https://www.zhihu.com/people/Sweets07
  * [Github]https://github.com/MatrixSeven
  * Created by seven on 2016/12/4.
  */
-@Data
+@Getter
+@Setter
+@ToString(of = {"token"})
 @RequiredArgsConstructor()
 public class UserBase{
     private String token;
