@@ -73,9 +73,11 @@ public class ParserFollower extends ParserBase {
             for (int i = 0; i < jsonObject.getJSONArray("data").size(); i++) {
                 ub = new UserBase();
                 ub.setToken(jsonObject.getJSONArray("data").getJSONObject(i).get("url_token").toString());
+                ub.setName(jsonObject.getJSONArray("data").getJSONObject(i).get("name").toString());
                 ub.setUrl("https://www.zhihu.com/people/".concat(ub.getToken()));
                 ub.setFrom_id(userBase.getId());
                 ub.setFrom_token(userBase.getToken());
+                ub.setName(jsonObject.getJSONArray("data").getJSONObject(i).get("name").toString());
                 followNexuses.add(new FollowNexus(userBase.getToken(), ub.getToken(),ub.getName(),userBase.getName()));
 
                 userBases.add(ub);

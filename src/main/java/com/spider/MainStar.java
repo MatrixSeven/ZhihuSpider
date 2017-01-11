@@ -25,6 +25,6 @@ import com.spider.parser.MainMangerControl;
 public class MainStar {
     public static void main(String[] args) throws Exception{
        new MainMangerControl().star();
-
     }
 }
+

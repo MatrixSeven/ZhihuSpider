@@ -25,7 +25,6 @@ import com.spider.https.ZhiHuHttp;
 import com.spider.tool.Config;
 import com.spider.tool.Console;
 import com.spider.tool.LRUCache;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -39,11 +38,17 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class MainMangerControl {
     private long time = System.currentTimeMillis();
+    //新增userBase
     private volatile List<UserBase> userBases;
+    //获取关注完成的userBase
     private volatile List<UserBase> doneBaseUpdate;
+    //parser完成的users数据
     private volatile List<UserInfo> userInfo;
+    //需要parser的users
     private volatile List<UserBase> token;
+    //缓存userbase
     private volatile LRUCache<UserBase> tempUserBases;
+    //跟随者FollowNexus
     private volatile List<FollowNexus> followNexuses;
     private volatile AtomicLong atomicLong = new AtomicLong(0L);
     private volatile boolean isLoadTask_ = false;
@@ -64,7 +69,10 @@ public class MainMangerControl {
         doneBaseUpdate = new ArrayList();
         userInfo = new ArrayList();
         followNexuses = new ArrayList();
-        daoInterface = new imp();
+        daoInterface = new imp();/**(imp)Proxy.newProxyInstance(
+                this.getClass().getClassLoader(),
+                new Class[]{SaveDaoInterface.class},
+                new Hook(new imp()));**/
         token = new ArrayList<>(512);
         tempUserBases = new LRUCache<>(350000);
     }
@@ -103,7 +111,6 @@ public class MainMangerControl {
                             isLoadTask_ = true;
                             if (doneBaseUpdate.size() != 0||userBases.size()!=0) {
                                 updateUserBase();
-
                             }
                             for (UserBase u : this.daoInterface.getNewForUserBase()) {
                                 this.servicePool.execute(new ParserFollower(u, this));
@@ -142,7 +149,6 @@ public class MainMangerControl {
     }
 
     public void remove(UserBase o) throws Exception {
-        userBases.remove(o);
         doneBaseUpdate.add(o);
         if (this.doneBaseUpdate.size() > max) {
             daoInterface.UpdateBase(doneBaseUpdate);
@@ -170,6 +176,7 @@ public class MainMangerControl {
         for (UserBase userBase : o) {
             if (!isExist(userBase)) {
                 this.userBases.add(userBase);
+                continue;
             }
             atomicLong.incrementAndGet();
         }

@@ -72,18 +72,18 @@ public class ZhiHuHttp {
 
     static {
         try {
-            login();
+//            login();
         }catch (Exception e){
             e.printStackTrace();
         }
 
     }
     public ZhiHuHttp() {
-       try {
-           login();
-       }catch (Exception e){
-           e.printStackTrace();
-       }
+        try {
+//           login();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
     }
 
@@ -100,14 +100,14 @@ public class ZhiHuHttp {
     public static void login() throws Exception {
         httpClientContext = HttpUtil.getHttpClientContext();
         if (HttpUtil.deserializeCookie(CONFIG.getCookie_path(), httpClientContext)) {
-            System.out.println("¼ÓÔØcookie");
+            System.out.println("åŠ è½½cookie");
             initAuthCookie();
             return;
         }
 
         CloseableHttpClient closeableHttpClient = HttpUtil.getHttpClient();
         CloseableHttpResponse closeableHttpResponse;
-        System.out.println("µÇÂ½ÖĞ....");
+        System.out.println("ç™»é™†ä¸­....");
         HttpGet get = new HttpGet(URI.create(INDEX_URL));
         Document doc = Jsoup.parse(EntityUtils.toString(closeableHttpClient.execute(get, httpClientContext).getEntity()));
         String xsf = doc.select("input[name=_xsrf]").first().attr("value");
@@ -118,9 +118,9 @@ public class ZhiHuHttp {
         List<NameValuePair> formParams = new ArrayList<NameValuePair>();
         Scanner sc = new Scanner(System.in);
         if(pass==null||username==null||pass.equals("")||username.equals("")){
-            throw  new Exception("ÇëÊäÈëÍêÕûµÄÓÃ»§ÃûºÍÃÜÂë");
+            throw  new Exception("è¯·è¾“å…¥å®Œæ•´çš„ç”¨æˆ·åå’Œå¯†ç ");
         }
-        System.out.println("ÇëÊäÈëÑéÖ¤Âë");
+        System.out.println("è¯·è¾“å…¥éªŒè¯ç ");
         String Yzm = sc.nextLine();
         formParams.add(new BasicNameValuePair("captcha", Yzm));
         formParams.add(new BasicNameValuePair("_xsrf", xsf));
@@ -132,7 +132,7 @@ public class ZhiHuHttp {
         String res = EntityUtils.toString((closeableHttpResponse = closeableHttpClient.execute(request, httpClientContext)).getEntity());
         System.out.println(res);
         if(res.indexOf("errcode")!=-1){
-            throw  new Exception("µÇÂ½Ê§°Ü£¬Çë¼ì²éĞÅÏ¢£¬³ÌĞòÍË³ö");
+            throw  new Exception("ç™»é™†å¤±è´¥ï¼Œè¯·æ£€æŸ¥ä¿¡æ¯ï¼Œç¨‹åºé€€å‡º");
         }
         HttpUtil.serializeCookie(httpClientContext.getCookieStore(),
                 CONFIG.getCookie_path());

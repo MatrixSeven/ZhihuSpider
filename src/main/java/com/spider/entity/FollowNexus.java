@@ -31,7 +31,7 @@ public class FollowNexus {
     //Nothing
     private String token_flower;
     //Nothing
-    private String from_name;
+    private String flower_name;
     //Nothing
     private String name;
 
