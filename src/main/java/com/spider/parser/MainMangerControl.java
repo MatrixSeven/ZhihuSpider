@@ -101,13 +101,9 @@ public class MainMangerControl {
                     synchronized (doneBaseUpdate) {
                         if (servicePool.getQueue().size() == 0) {
                             isLoadTask_ = true;
-                            if (doneBaseUpdate.size() != 0) {
-                                synchronized (userBases) {
-                                    daoInterface.SaveForUserBase(userBases);
-                                    this.userBases.clear();
-                                }
-                                daoInterface.UpdateBase(doneBaseUpdate);
-                                doneBaseUpdate.clear();
+                            if (doneBaseUpdate.size() != 0||userBases.size()!=0) {
+                                updateUserBase();
+
                             }
                             for (UserBase u : this.daoInterface.getNewForUserBase()) {
                                 this.servicePool.execute(new ParserFollower(u, this));
@@ -146,26 +142,30 @@ public class MainMangerControl {
     }
 
     public void remove(UserBase o) throws Exception {
-        //清除数据
         userBases.remove(o);
         doneBaseUpdate.add(o);
-        //更新base
         if (this.doneBaseUpdate.size() > max) {
             daoInterface.UpdateBase(doneBaseUpdate);
             doneBaseUpdate.clear();
         }
     }
 
-
+    private void  updateUserBase() throws Exception{
+        synchronized (doneBaseUpdate){
+            daoInterface.UpdateBase(doneBaseUpdate);
+            doneBaseUpdate.clear();
+        }
+        synchronized (userBases) {
+            daoInterface.SaveForUserBase(userBases);
+            this.userBases.clear();
+        }
+    }
     private void addUserBase(List<UserBase> o) throws Exception {
         if (this.userBases.size() > max ||
                 (servicePool.getQueue().size() == 0 &&
                         servicePool.getActiveCount() <
                                 max_active && doneBaseUpdate.size() > 0)) {
-            synchronized (userBases) {
-                daoInterface.SaveForUserBase(userBases);
-                this.userBases.clear();
-            }
+            updateUserBase();
         }
         for (UserBase userBase : o) {
             if (!isExist(userBase)) {
