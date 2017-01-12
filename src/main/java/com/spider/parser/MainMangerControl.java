@@ -17,7 +17,7 @@ package com.spider.parser;
 
 
 import com.spider.dao.SaveDaoInterface;
-import com.spider.dao.imp;
+import com.spider.dao.SaveDaoImp;
 import com.spider.entity.FollowNexus;
 import com.spider.entity.UserBase;
 import com.spider.entity.UserInfo;
@@ -25,6 +25,7 @@ import com.spider.https.ZhiHuHttp;
 import com.spider.tool.Config;
 import com.spider.tool.Console;
 import com.spider.tool.LRUCache;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -37,6 +38,9 @@ import java.util.concurrent.atomic.AtomicLong;
  * Created by seven on 2016/12/2.
  */
 public class MainMangerControl {
+
+  //  private Logger log= Logger.getLogger("error_file_dao");
+
     private long time = System.currentTimeMillis();
     //新增userBase
     private volatile List<UserBase> userBases;
@@ -69,10 +73,7 @@ public class MainMangerControl {
         doneBaseUpdate = new ArrayList();
         userInfo = new ArrayList();
         followNexuses = new ArrayList();
-        daoInterface = new imp();/**(imp)Proxy.newProxyInstance(
-                this.getClass().getClassLoader(),
-                new Class[]{SaveDaoInterface.class},
-                new Hook(new imp()));**/
+        daoInterface = SaveDaoImp.getInstance();
         token = new ArrayList<>(512);
         tempUserBases = new LRUCache<>(350000);
     }

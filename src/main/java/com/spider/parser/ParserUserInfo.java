@@ -22,6 +22,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -35,6 +36,7 @@ import static com.spider.https.HttpUtil.getHttpClient;
  * Created by seven on 2016/12/8.
  */
 public class ParserUserInfo extends ParserBase{
+    Logger logger =Logger.getLogger("error_");
 
     public ParserUserInfo(UserBase userBase, MainMangerControl mc) {
         super(userBase, mc);
@@ -42,7 +44,6 @@ public class ParserUserInfo extends ParserBase{
 
     protected UserInfo getUserInfo(Document doc){
         UserInfo u=new UserInfo();
-
         u.setName(ParserHelper.Select(doc, ".name"));
         u.setAddress(ParserHelper.Select(doc, "span.location.item"));
         u.setBusiness(ParserHelper.Select(doc, "span.business.item"));
@@ -88,7 +89,7 @@ public class ParserUserInfo extends ParserBase{
         try {
             parser();
         }catch (Exception e){
-            e.printStackTrace();
+            logger.error("处理Parser个人信息报错--->",e);
         }
     }
 }
