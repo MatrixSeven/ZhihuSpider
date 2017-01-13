@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class MainMangerControl {
 
-  //  private Logger log= Logger.getLogger("error_file_dao");
+    //  private Logger log= Logger.getLogger("error_file_dao");
 
     private long time = System.currentTimeMillis();
     //新增userBase
@@ -110,7 +110,7 @@ public class MainMangerControl {
                     synchronized (doneBaseUpdate) {
                         if (servicePool.getQueue().size() == 0) {
                             isLoadTask_ = true;
-                            if (doneBaseUpdate.size() != 0||userBases.size()!=0) {
+                            if (doneBaseUpdate.size() != 0 || userBases.size() != 0) {
                                 updateUserBase();
                             }
                             for (UserBase u : this.daoInterface.getNewForUserBase()) {
@@ -157,8 +157,8 @@ public class MainMangerControl {
         }
     }
 
-    private void  updateUserBase() throws Exception{
-        synchronized (doneBaseUpdate){
+    private void updateUserBase() throws Exception {
+        synchronized (doneBaseUpdate) {
             daoInterface.UpdateBase(doneBaseUpdate);
             doneBaseUpdate.clear();
         }
@@ -167,6 +167,7 @@ public class MainMangerControl {
             this.userBases.clear();
         }
     }
+
     private void addUserBase(List<UserBase> o) throws Exception {
         if (this.userBases.size() > max ||
                 (servicePool.getQueue().size() == 0 &&
@@ -174,12 +175,14 @@ public class MainMangerControl {
                                 max_active && doneBaseUpdate.size() > 0)) {
             updateUserBase();
         }
-        for (UserBase userBase : o) {
-            if (!isExist(userBase)) {
-                this.userBases.add(userBase);
-                continue;
+        synchronized (userBases) {
+            for (UserBase userBase : o) {
+                if (!isExist(userBase)) {
+                    this.userBases.add(userBase);
+                    continue;
+                }
+                atomicLong.incrementAndGet();
             }
-            atomicLong.incrementAndGet();
         }
     }
 
@@ -246,7 +249,7 @@ public class MainMangerControl {
                                     "完成线程数：" + servicePoolInfo.getCompletedTaskCount() + "\n" +
                                     "上次更新花费时间:" + time_ + "s" + "\n"
                     );
-                    System.out.println("运行" + (System.currentTimeMillis() - time) /3600000.00 + "h");
+                    System.out.println("运行" + (System.currentTimeMillis() - time) / 3600000.00 + "h");
                     Thread.sleep(3000);
                 }
             } catch (Exception e) {
