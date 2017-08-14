@@ -1,6 +1,6 @@
 # 知乎爬虫
 
-## 博客更新地址:[http://sweets.cf](http://sweets.cf/2016/11/23/%E7%9F%A5%E4%B9%8E%E7%88%AC%E8%99%AB%E4%B9%8B%E5%BC%80%E7%AF%87/) 
+## 博客更新地址:[https://matrixseven.github.io](https://matrixseven.github.io/2016/11/23/%E7%9F%A5%E4%B9%8E%E7%88%AC%E8%99%AB%E4%B9%8B%E5%BC%80%E7%AF%87/) 
 ## 知乎专栏更新地址:[https://zhuanlan.zhihu.com/Accelerator](https://zhuanlan.zhihu.com/Accelerator) 
 ## 博客园相关文章:[http://www.cnblogs.com/seven007](http://www.cnblogs.com/seven007/p/6248578.html)
 ### 1. Git求Star~O(∩_∩)O哈哈~~
